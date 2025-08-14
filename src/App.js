@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Swords, Users } from 'lucide-react';
-import { createRoot } from 'react-dom/client';
 
 // Main App Component
 const App = () => {
@@ -212,9 +211,4 @@ const App = () => {
   );
 };
 
-// We create a root element and render the App component into it
-const container = document.createElement('div');
-document.body.appendChild(container);
-const root = createRoot(container);
-root.render(<App />);
-
+export default App;
