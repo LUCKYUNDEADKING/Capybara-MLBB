@@ -8,48 +8,90 @@ const App = () => {
   const [error, setError] = useState(null);
   const [selectedHero, setSelectedHero] = useState(null);
   const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
-  const [retryCount, setRetryCount] = useState(0); // Add state for retry count
-  const MAX_RETRIES = 3; // Maximum number of retries
-  const API_URL = 'https://mlbb-stats.ridwaanhall.com/api/v1/heroes/';
-  const FETCH_TIMEOUT_MS = 10000; // 10-second timeout
 
-  // A helper function to add a timeout to the fetch request
-  const fetchWithTimeout = (url, options = {}, timeout = FETCH_TIMEOUT_MS) => {
-    return Promise.race([
-      fetch(url, options),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('请求超时')), timeout)
-      )
-    ]);
-  };
+  // Mock data to simulate the API response
+  const mockHeroes = [
+    {
+      hero_id: "1",
+      name: "Chou",
+      icon: "https://i.imgur.com/KzX33vC.png",
+      win_rate: 55.21,
+      countered_by: [
+        { hero_id: "2", name: "Nana", icon: "https://i.imgur.com/FjM0TzD.png" },
+        { hero_id: "3", name: "Akai", icon: "https://i.imgur.com/Pq9zY2w.png" }
+      ],
+      synergy: [
+        { hero_id: "4", name: "Masha", icon: "https://i.imgur.com/Y3U724t.png" },
+        { hero_id: "5", name: "Angela", icon: "https://i.imgur.com/R3zYq0T.png" }
+      ]
+    },
+    {
+      hero_id: "6",
+      name: "Nana",
+      icon: "https://i.imgur.com/FjM0TzD.png",
+      win_rate: 53.89,
+      countered_by: [
+        { hero_id: "7", name: "Lancelot", icon: "https://i.imgur.com/C5uM43l.png" },
+        { hero_id: "8", name: "Gusion", icon: "https://i.imgur.com/S8jQ13v.png" }
+      ],
+      synergy: [
+        { hero_id: "9", name: "Estes", icon: "https://i.imgur.com/E8RzY0d.png" },
+        { hero_id: "10", name: "Tigreal", icon: "https://i.imgur.com/P4w8hDq.png" }
+      ]
+    },
+    {
+      hero_id: "11",
+      name: "Fanny",
+      icon: "https://i.imgur.com/W2d4D9E.png",
+      win_rate: 51.50,
+      countered_by: [
+        { hero_id: "12", name: "Khufra", icon: "https://i.imgur.com/R4y2T1p.png" },
+        { hero_id: "13", name: "Diggie", icon: "https://i.imgur.com/Q1h9T3Z.png" }
+      ],
+      synergy: [
+        { hero_id: "14", name: "Ruby", icon: "https://i.imgur.com/D4sT5fE.png" },
+        { hero_id: "15", name: "Kaja", icon: "https://i.imgur.com/A6jP9vO.png" }
+      ]
+    },
+    {
+      hero_id: "16",
+      name: "Miya",
+      icon: "https://i.imgur.com/B9zT5hU.png",
+      win_rate: 49.03,
+      countered_by: [
+        { hero_id: "17", name: "Natalia", icon: "https://i.imgur.com/G5y1K3v.png" },
+        { hero_id: "18", name: "Hayabusa", icon: "https://i.imgur.com/P9oT4eJ.png" }
+      ],
+      synergy: [
+        { hero_id: "19", name: "Layla", icon: "https://i.imgur.com/D1h2F3s.png" },
+        { hero_id: "20", name: "Eudora", icon: "https://i.imgur.com/L6kP5jW.png" }
+      ]
+    },
+    {
+      hero_id: "21",
+      name: "Gord",
+      icon: "https://i.imgur.com/C4gL5pP.png",
+      win_rate: 47.78,
+      countered_by: [
+        { hero_id: "22", name: "Chou", icon: "https://i.imgur.com/KzX33vC.png" },
+        { hero_id: "23", name: "Ling", icon: "https://i.imgur.com/T4j8Y7L.png" }
+      ],
+      synergy: [
+        { hero_id: "24", name: "Minotaur", icon: "https://i.imgur.com/Z8vX1hT.png" },
+        { hero_id: "25", name: "Atlas", icon: "https://i.imgur.com/Y2w8T1u.png" }
+      ]
+    }
+  ];
 
-  // Function to fetch hero data with retry and timeout logic
-  const fetchHeroesWithRetry = async (retries = 0) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetchWithTimeout(API_URL);
-      if (!response.ok) {
-        throw new Error(`API 请求失败，状态码: ${response.status}`);
-      }
-      const data = await response.json();
-      const sortedData = data.sort((a, b) => b.win_rate - a.win_rate);
+  // Function to load mock data locally
+  useEffect(() => {
+    // Simulate a network delay to show the loading animation
+    setTimeout(() => {
+      // Sort mock data by win rate initially in descending order
+      const sortedData = mockHeroes.sort((a, b) => b.win_rate - a.win_rate);
       setHeroes(sortedData);
       setLoading(false);
-    } catch (e) {
-      if (retries < MAX_RETRIES) {
-        setRetryCount(retries + 1);
-        setTimeout(() => fetchHeroesWithRetry(retries + 1), 2000 * (retries + 1));
-      } else {
-        setError(`加载数据失败。请检查您的网络连接或稍后重试。详细错误: ${e.message}`);
-        setLoading(false);
-      }
-    }
-  };
-
-  // Initial fetch on component mount
-  useEffect(() => {
-    fetchHeroesWithRetry(0);
+    }, 1500); // 1.5 seconds delay to see the animation
   }, []);
 
   // Function to handle sorting the hero list
@@ -93,26 +135,17 @@ const App = () => {
             <Swords size={64} className="text-emerald-500 spinner" />
           </div>
           <p className="mt-4 text-xl font-semibold">正在加载英雄数据...</p>
-          {retryCount > 0 && (
-            <p className="text-md text-gray-400 mt-2">正在重试 ({retryCount}/{MAX_RETRIES})...</p>
-          )}
         </div>
       </div>
     );
   }
 
-  // Render error state
+  // Render error state (This should not be reached with local data)
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white p-4 text-center">
         <div className="text-xl text-red-500 font-semibold mb-4">加载失败</div>
         <p className="text-gray-300 max-w-md">{error}</p>
-        <button
-          onClick={() => fetchHeroesWithRetry(0)}
-          className="mt-6 px-4 py-2 bg-emerald-500 text-white rounded-lg shadow-md hover:bg-emerald-400 transition-colors"
-        >
-          重新加载
-        </button>
       </div>
     );
   }
