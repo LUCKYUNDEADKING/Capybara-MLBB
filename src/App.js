@@ -5,7 +5,6 @@ import { ChevronDown, ChevronUp, Swords, Users } from 'lucide-react';
 const App = () => {
   const [heroes, setHeroes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedHero, setSelectedHero] = useState(null);
   const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
 
@@ -110,7 +109,7 @@ const App = () => {
   // Render loading state with a visual animation
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white p-4">
+      <div className="flex flex-col items-center justify-center h-screen w-screen bg-slate-900 text-white">
         {/* CSS for the loading animation */}
         <style>
           {`
@@ -119,8 +118,8 @@ const App = () => {
               to { transform: rotate(360deg); }
             }
             @keyframes pulse {
-              0%, 100% { transform: scale(1); }
-              50% { transform: scale(1.1); }
+              0%, 100% { transform: scale(1); opacity: 1; }
+              50% { transform: scale(1.1); opacity: 0.7; }
             }
             .spinner {
               animation: spin 1.5s linear infinite;
@@ -131,21 +130,11 @@ const App = () => {
           `}
         </style>
         <div className="flex flex-col items-center justify-center">
-          <div className="relative pulsate">
+          <div className="relative pulsate mb-4">
             <Swords size={64} className="text-emerald-500 spinner" />
           </div>
-          <p className="mt-4 text-xl font-semibold">正在加载英雄数据...</p>
+          <p className="text-2xl font-extrabold text-emerald-400">正在加载英雄数据...</p>
         </div>
-      </div>
-    );
-  }
-
-  // Render error state (This should not be reached with local data)
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white p-4 text-center">
-        <div className="text-xl text-red-500 font-semibold mb-4">加载失败</div>
-        <p className="text-gray-300 max-w-md">{error}</p>
       </div>
     );
   }
