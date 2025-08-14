@@ -8,29 +8,38 @@ const App = () => {
   const [error, setError] = useState(null);
   const [selectedHero, setSelectedHero] = useState(null);
   const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
+  const [retryCount, setRetryCount] = useState(0); // Add state for retry count
+  const MAX_RETRIES = 3; // Maximum number of retries
 
   const API_URL = 'https://mlbb-stats.ridwaanhall.com/api/v1/heroes/';
 
-  // Function to fetch hero data from the API
-  useEffect(() => {
-    const fetchHeroes = async () => {
-      try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-          throw new Error(`API 请求失败，状态码: ${response.status}`);
-        }
-        const data = await response.json();
-        // Sort heroes by win rate initially in descending order
-        const sortedData = data.sort((a, b) => b.win_rate - a.win_rate);
-        setHeroes(sortedData);
-        setLoading(false);
-      } catch (e) {
-        setError(e.message);
+  // Function to fetch hero data with retry logic
+  const fetchHeroesWithRetry = async (retries = 0) => {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error(`API 请求失败，状态码: ${response.status}`);
+      }
+      const data = await response.json();
+      // Sort heroes by win rate initially in descending order
+      const sortedData = data.sort((a, b) => b.win_rate - a.win_rate);
+      setHeroes(sortedData);
+      setLoading(false);
+      setError(null); // Clear any previous errors
+    } catch (e) {
+      if (retries < MAX_RETRIES) {
+        setRetryCount(retries + 1);
+        setTimeout(() => fetchHeroesWithRetry(retries + 1), 2000 * (retries + 1)); // Exponential backoff
+      } else {
+        setError(`加载数据失败。请检查您的网络连接或稍后重试。详细错误: ${e.message}`);
         setLoading(false);
       }
-    };
+    }
+  };
 
-    fetchHeroes();
+  // Initial fetch and subsequent retries
+  useEffect(() => {
+    fetchHeroesWithRetry(0);
   }, []);
 
   // Function to handle sorting the hero list
@@ -58,8 +67,8 @@ const App = () => {
   // Render error state
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white">
-        <div className="text-xl text-red-500 font-semibold">错误: {error}</div>
+      <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white p-4 text-center">
+        <div className="text-xl text-red-500 font-semibold">{error}</div>
       </div>
     );
   }
